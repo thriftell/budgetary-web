@@ -1,0 +1,34 @@
+---
+import Base from "../layouts/Base.astro";
+import Footer from "../components/Footer.astro";
+import { CLIENTS_REPO } from "../data/install";
+---
+
+<Base title="License — budgetary.tools" description="Licensing for the Budgetary clients and this website.">
+  <main class="wrap" style="padding-top: 64px; padding-bottom: 64px; max-width: 720px;">
+    <p class="eyebrow">budgetary.tools</p>
+    <h1>License</h1>
+
+    <h2>Clients &amp; SDKs</h2>
+    <p>
+      The open-source Budgetary clients — language SDKs and editor plugins — are released under the
+      <b>Apache License 2.0</b>. The canonical text ships with the source at
+      <a href={`${CLIENTS_REPO}/blob/main/LICENSE`}>{CLIENTS_REPO}/blob/main/LICENSE</a>.
+    </p>
+
+    <h2>This website</h2>
+    <p>
+      The content of this site (budgetary.tools) is published for informational purposes. The
+      hosted Budgetary API is a service governed by the <a href="/terms">Terms of Service</a>.
+    </p>
+
+    <h2>The estimator engine</h2>
+    <p>
+      The hosted estimation service is proprietary and is not part of the open-source client
+      repositories.
+    </p>
+
+    <p style="margin-top: 40px;"><a href="/">← Back to home</a></p>
+  </main>
+  <Footer />
+</Base>

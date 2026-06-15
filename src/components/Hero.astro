@@ -1,0 +1,31 @@
+---
+import CopyBlock from "./CopyBlock.astro";
+import { HERO_INSTALL } from "../data/install";
+---
+
+<section id="hero">
+  <div class="wrap">
+    <p class="eyebrow">budgetary.tools</p>
+    <h1 style="font-size: clamp(2rem, 5vw, 3.1rem); margin: 0 0 18px; max-width: 18ch;">
+      Know what a coding task will cost — or know that we don't know. Never a confident guess.
+    </h1>
+    <p class="lede">
+      Budgetary gives your AI coding agent a pre-flight token-spend estimate: a range, a
+      scenario, and a confidence signal — before the task runs. Where it has no coverage, it
+      says so. Free and unlimited.
+    </p>
+
+    <div style="margin: 28px 0 18px; max-width: 640px;">
+      <CopyBlock id="hero-install" code={HERO_INSTALL} label="Install (Claude Code)" />
+    </div>
+
+    <p style="margin: 0 0 24px; color: var(--fg-faint); font-size: 0.88rem;">
+      Other agents and editors below. Use a free <code>bg_test_</code> key to start.
+    </p>
+
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <a class="btn btn-primary" href="#install">Install options</a>
+      <a class="btn btn-ghost" href="/how-it-works">How it works →</a>
+    </div>
+  </div>
+</section>

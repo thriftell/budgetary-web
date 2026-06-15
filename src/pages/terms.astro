@@ -1,0 +1,44 @@
+---
+import Base from "../layouts/Base.astro";
+import Footer from "../components/Footer.astro";
+import { API_BASE } from "../data/install";
+---
+
+<Base title="Terms — budgetary.tools" description="Terms of service for the Budgetary hosted API and website.">
+  <main class="wrap" style="padding-top: 64px; padding-bottom: 64px; max-width: 720px;">
+    <p class="eyebrow">budgetary.tools</p>
+    <h1>Terms of Service</h1>
+    <p class="note">Last updated 2026-06-15. This is a plain-language summary, not the final legal text.</p>
+
+    <h2>What Budgetary is</h2>
+    <p>
+      Budgetary is a hosted API at <code>{API_BASE}</code> that returns probabilistic, pre-inference
+      token-spend estimates for coding tasks. Estimates are coverage-local and qualified with a
+      confidence signal. Where the service has no coverage it returns a "no read" rather than a
+      number. <b>Estimates are not guarantees</b> and must not be relied on as exact predictions of
+      cost.
+    </p>
+
+    <h2>Acceptable use</h2>
+    <p>
+      Use the API with a valid key, within the rate limits for your tier. Don't attempt to disrupt
+      the service or reverse the estimator. Free <code>bg_test_</code> keys are provided as-is for
+      evaluation and personal use.
+    </p>
+
+    <h2>Data</h2>
+    <p>
+      You send the text of the task you want estimated. Budgetary does not index or read your
+      repository. Realized usage you choose to submit is used to improve future estimates.
+    </p>
+
+    <h2>No warranty</h2>
+    <p>
+      The service is provided "as is," without warranty of any kind. Budgetary is not liable for
+      decisions made on the basis of an estimate.
+    </p>
+
+    <p style="margin-top: 40px;"><a href="/">← Back to home</a></p>
+  </main>
+  <Footer />
+</Base>
