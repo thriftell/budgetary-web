@@ -1,0 +1,57 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Budgetary — pre-flight token-spend estimates for AI coding agents",
+  description = 'Pre-flight token-spend estimates for AI coding agents, or an honest "no read". Never a confident guess.',
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+  </head>
+  <body>
+    <slot />
+    <script>
+      // Progressive-enhancement copy buttons. No dependency on framework JS.
+      document.querySelectorAll<HTMLButtonElement>(".copy-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const sel = btn.getAttribute("data-target");
+          const code = sel ? document.querySelector(sel) : null;
+          const text = code?.textContent ?? "";
+          try {
+            await navigator.clipboard.writeText(text.trim());
+            const original = btn.textContent;
+            btn.dataset.copied = "true";
+            btn.textContent = "Copied";
+            setTimeout(() => {
+              btn.dataset.copied = "false";
+              btn.textContent = original;
+            }, 1600);
+          } catch {
+            btn.textContent = "Copy failed";
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

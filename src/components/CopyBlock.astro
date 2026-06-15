@@ -1,0 +1,16 @@
+---
+// A copy-able code block with a working copy button.
+// `code` is the verbatim text; `id` must be unique on the page.
+interface Props {
+  code: string;
+  id: string;
+  label?: string;
+}
+const { code, id, label } = Astro.props;
+---
+
+{label && <span class="prompt-label">{label}</span>}
+<div class="codeblock">
+  <button class="copy-btn" data-target={`#${id}`} aria-label="Copy to clipboard">Copy</button>
+  <pre id={id}><code>{code}</code></pre>
+</div>

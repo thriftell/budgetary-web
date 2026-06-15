@@ -1,0 +1,37 @@
+---
+import Base from "../layouts/Base.astro";
+import Footer from "../components/Footer.astro";
+import CopyBlock from "../components/CopyBlock.astro";
+import { HERO_INSTALL } from "../data/install";
+---
+
+<Base title="Get a key — budgetary.tools" description="How to get a free Budgetary API key and start estimating.">
+  <main class="wrap" style="padding-top: 64px; padding-bottom: 64px; max-width: 720px;">
+    <p class="eyebrow">budgetary.tools</p>
+    <h1>Get a key</h1>
+    <p class="lede">
+      Budgetary is free and unlimited. You need an API key to talk to the hosted estimator — a free
+      <code>bg_test_</code> key is ungated, and <code>bg_live_</code> keys are issued per organization
+      for production.
+    </p>
+
+    <h2>1. Get a free key</h2>
+    <p>
+      Sign in to the Budgetary dashboard to issue a <code>bg_test_</code> key.
+      <span class="todo">TODO(verify): dashboard / key-issuance URL is a server surface (0010/0011) and not yet pinned here.</span>
+    </p>
+
+    <h2>2. Add the MCP server</h2>
+    <p>Drop your key into the install command (or any of the <a href="/#install">install options</a>):</p>
+    <CopyBlock id="signup-install" code={HERO_INSTALL} />
+
+    <h2>3. Estimate</h2>
+    <p>
+      Ask your agent for a pre-flight estimate, or let it call <code>estimate</code> on its own before
+      a task. See it live at <a href="https://dryruns.tools">dryruns.tools</a>.
+    </p>
+
+    <p style="margin-top: 40px;"><a href="/">← Back to home</a></p>
+  </main>
+  <Footer />
+</Base>

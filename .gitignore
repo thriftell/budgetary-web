@@ -1,0 +1,19 @@
+# build output
+dist/
+.astro/
+src/env.d.ts
+
+# deps
+node_modules/
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# os / editor
+.DS_Store
+*.log
+npm-debug.log*
+.vscode/
+.idea/

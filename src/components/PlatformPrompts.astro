@@ -1,0 +1,49 @@
+---
+import CopyBlock from "./CopyBlock.astro";
+import { CLAUDE_CODE, CURSOR, CODEX } from "../data/install";
+
+const platforms = [
+  { key: "claude", name: "Claude Code", data: CLAUDE_CODE, hasTodo: false },
+  { key: "cursor", name: "Cursor", data: CURSOR, hasTodo: true },
+  { key: "codex", name: "Codex", data: CODEX, hasTodo: true },
+];
+---
+
+<section id="prompts">
+  <div class="wrap">
+    <p class="eyebrow">Copy-paste prompts</p>
+    <h2 style="margin: 0 0 12px; font-size: clamp(1.5rem, 3vw, 2rem);">Wire it up, then watch it work</h2>
+    <p class="lede" style="margin-bottom: 28px;">
+      Two prompts per platform. <b>Onboarding</b> tells your agent exactly how to add Budgetary —
+      it states what it does and never writes a key without your say-so. <b>Demo</b> shows the
+      <code>estimate</code> tool in use. Once installed, the pre-flight estimate happens on its own.
+    </p>
+
+    {
+      platforms.map((p) => (
+        <article class="platform">
+          <header>
+            <h3>{p.name}</h3>
+            <span class={`actuals ${p.data.actuals}`}>
+              {p.data.actuals === "auto" ? "● actuals: auto" : "○ actuals: estimate-only"}
+            </span>
+          </header>
+          <div class="body">
+            <div>
+              <CopyBlock id={`${p.key}-onboarding`} code={p.data.onboarding} label="a · Onboarding — paste into the agent" />
+              {p.hasTodo && (
+                <p class="note todo">
+                  TODO(verify): config derived from the MCP registry package; not yet confirmed against an official {p.name} setup doc.
+                </p>
+              )}
+            </div>
+            <div>
+              <CopyBlock id={`${p.key}-demo`} code={p.data.demo} label="b · Demo — see the estimate tool in use" />
+            </div>
+            <p class="note">{p.data.actualsLine}</p>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</section>

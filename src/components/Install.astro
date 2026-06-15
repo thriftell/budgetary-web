@@ -1,0 +1,39 @@
+---
+import CopyBlock from "./CopyBlock.astro";
+import { CLAUDE_PLUGIN, MCP_STDIO, VSCODE_STEPS, MCP_HTTP_REMOTE } from "../data/install";
+---
+
+<section id="install">
+  <div class="wrap">
+    <p class="eyebrow">Install</p>
+    <h2 style="margin: 0 0 12px; font-size: clamp(1.5rem, 3vw, 2rem);">One MCP server, any agent</h2>
+    <p class="lede" style="margin-bottom: 28px;">
+      Budgetary is an MCP server. Add it to your agent and it exposes one tool — <code>estimate</code>.
+      Start with a free <code>bg_test_</code> key.
+    </p>
+
+    <div style="display: grid; gap: 22px; max-width: 720px;">
+      <div>
+        <CopyBlock
+          id="install-plugin"
+          code={CLAUDE_PLUGIN}
+          label="Claude Code — plugin"
+        />
+        <p class="note">Claude Code prompts for your API key during install and stores it in your system keychain.</p>
+      </div>
+
+      <div>
+        <CopyBlock id="install-stdio" code={MCP_STDIO} label="Any MCP agent — stdio" />
+        <p class="note">
+          Or point your agent at the hosted server directly: <code>{MCP_HTTP_REMOTE}</code>
+          (streamable-http, bearer auth).
+        </p>
+      </div>
+
+      <div>
+        <CopyBlock id="install-vscode" code={VSCODE_STEPS} label="VS Code" />
+        <p class="note todo">TODO(verify): exact Open VSX / Marketplace extension id not yet pinned in source.</p>
+      </div>
+    </div>
+  </div>
+</section>
