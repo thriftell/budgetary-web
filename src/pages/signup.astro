@@ -2,36 +2,152 @@
 import Base from "../layouts/Base.astro";
 import Footer from "../components/Footer.astro";
 import CopyBlock from "../components/CopyBlock.astro";
-import { HERO_INSTALL } from "../data/install";
+import { HERO_INSTALL, API_BASE } from "../data/install";
+
+// Cloudflare Turnstile site key is PUBLIC and belongs in the page (the secret
+// stays server-side in 0021a). Default is Cloudflare's official "always passes"
+// TEST key, so the page works in dev/preview; production sets the real key via
+// the PUBLIC_TURNSTILE_SITE_KEY build env var.
+// TODO(verify): set PUBLIC_TURNSTILE_SITE_KEY to the real Turnstile site key for production.
+const TURNSTILE_SITE_KEY =
+  import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
 ---
 
-<Base title="Get a key — budgetary.tools" description="How to get a free Budgetary API key and start estimating.">
+<Base
+  title="Get a free key — budgetary.tools"
+  description="Get a free, anonymous Budgetary API key in your browser and start estimating."
+>
   <main class="wrap" style="padding-top: 64px; padding-bottom: 64px; max-width: 720px;">
     <p class="eyebrow">budgetary.tools</p>
-    <h1>Get a key</h1>
+    <h1>Get a free key</h1>
     <p class="lede">
-      Budgetary is free and unlimited. You need an API key to talk to the hosted estimator — a free
-      <code>bg_test_</code> key is ungated, and <code>bg_live_</code> keys are issued per organization
-      for production.
+      Budgetary is free. Generate an anonymous <code>bg_test_</code> key right here — no account, no
+      login — add it to your agent, and start getting pre-flight estimates. (<code>bg_live_</code>
+      keys are issued per organization for production.)
     </p>
 
-    <h2>1. Get a free key</h2>
+    <h2>1 · Generate your key</h2>
     <p>
-      Sign in to the Budgetary dashboard to issue a <code>bg_test_</code> key.
-      <span class="todo">TODO(verify): dashboard / key-issuance URL is a server surface (0010/0011) and not yet pinned here.</span>
+      The key is <strong>anonymous and not recoverable</strong>: we don't store it and can't show it
+      again, so copy it the moment it appears. Issuance is rate-limited to keep it abuse-resistant.
     </p>
 
-    <h2>2. Add the MCP server</h2>
-    <p>Drop your key into the install command (or any of the <a href="/#install">install options</a>):</p>
-    <CopyBlock id="signup-install" code={HERO_INSTALL} />
+    <!-- Issuance form: captcha + button. Hidden once a key is issued. -->
+    <div id="signup-form" style="margin-top: 18px;">
+      <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline
+      ></script>
+      <div
+        class="cf-turnstile"
+        data-sitekey={TURNSTILE_SITE_KEY}
+        data-theme="dark"
+        style="margin-bottom: 16px;"
+      >
+      </div>
+      <button id="get-key-btn" class="btn btn-primary" type="button">Get my free key</button>
+      <p id="signup-error" class="note" role="alert" hidden style="color: var(--warn);"></p>
+    </div>
 
-    <h2>3. Estimate</h2>
+    <!-- Result: shown once on success. Copy buttons pre-exist so the Base copy
+         handler wires them at load; JS fills the text and reveals the block. -->
+    <div id="signup-result" hidden style="margin-top: 18px;">
+      <p
+        style="background: rgba(251,191,36,0.08); border: 1px solid #5a4a1e; color: var(--warn); border-radius: var(--radius); padding: 12px 16px; margin: 0 0 16px; font-weight: 600;"
+      >
+        ⚠ Save this now — it is not recoverable. We don't store it and can't show it again.
+      </p>
+      <CopyBlock id="issued-key" code="" label="Your free key" />
+      <p style="margin-top: 16px;">Add the MCP server with your key dropped in:</p>
+      <CopyBlock id="issued-install" code="" label="Install (Claude Code)" />
+      <p class="note">
+        More <a href="/#install">install options</a> and per-platform prompts are on the home page.
+      </p>
+    </div>
+
+    <h2 style="margin-top: 40px;">2 · Estimate</h2>
     <p>
-      Ask your agent for a pre-flight estimate, or let it call <code>estimate</code> on its own before
-      a task. See it live at <a href="https://dryruns.tools">dryruns.tools</a>.
+      Once the server is added, ask your agent for a pre-flight estimate, or let it call
+      <code>estimate</code> on its own before a task. See it live at
+      <a href="https://dryruns.tools">dryruns.tools</a>.
     </p>
 
     <p style="margin-top: 40px;"><a href="/">← Back to home</a></p>
   </main>
   <Footer />
+
+  <script define:vars={{ apiBase: API_BASE, heroInstall: HERO_INSTALL }}>
+    // Self-serve key issuance against POST /v1/signup (0021a). No secrets here:
+    // the key is server-generated and shown once; only the public captcha site
+    // key is in the page.
+    //
+    // TODO(verify) against 0021a: the request captcha field name and the
+    // response key field name below are not yet pinned in published source.
+    const CAPTCHA_FIELD = "captcha_token";
+    const readKey = (data) => data.api_key || data.key || data.token;
+
+    const btn = document.getElementById("get-key-btn");
+    const errEl = document.getElementById("signup-error");
+    const formEl = document.getElementById("signup-form");
+    const resultEl = document.getElementById("signup-result");
+    const keyEl = document.getElementById("issued-key");
+    const installEl = document.getElementById("issued-install");
+
+    const showError = (msg) => {
+      errEl.textContent = msg;
+      errEl.hidden = false;
+    };
+    const resetWidget = () => {
+      if (typeof turnstile !== "undefined") turnstile.reset();
+    };
+
+    btn.addEventListener("click", async () => {
+      errEl.hidden = true;
+
+      if (typeof turnstile === "undefined") {
+        showError("Verification is still loading — give it a second and try again.");
+        return;
+      }
+      const token = turnstile.getResponse();
+      if (!token) {
+        showError("Please complete the verification first.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Issuing…";
+      try {
+        const res = await fetch(apiBase + "/v1/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ [CAPTCHA_FIELD]: token }),
+        });
+
+        if (res.status === 201) {
+          const data = await res.json().catch(() => ({}));
+          const key = readKey(data);
+          if (!key) throw new Error("no-key-in-response");
+          keyEl.textContent = key;
+          installEl.textContent = heroInstall.replace("bg_test_YOUR_KEY", key);
+          formEl.hidden = true;
+          resultEl.hidden = false;
+          return;
+        }
+
+        // Unhappy paths — plain, non-alarming. Token is single-use, so reset.
+        resetWidget();
+        if (res.status === 429) {
+          showError("You've requested a key recently. Please wait a bit and try again.");
+        } else if (res.status === 400 || res.status === 403) {
+          showError("That verification didn't go through. Please try again.");
+        } else {
+          showError("Something went wrong issuing your key. Please try again in a moment.");
+        }
+      } catch (err) {
+        resetWidget();
+        showError("Couldn't reach the key service. Check your connection and try again.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Get my free key";
+      }
+    });
+  </script>
 </Base>
