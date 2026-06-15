@@ -1,11 +1,13 @@
 ---
 import { CLIENTS_REPO, DRYRUNS } from "../data/install";
+import { SHOW_DETAILS } from "../config";
 ---
 
 <footer>
   <div class="wrap">
     <div class="links">
-      <a href="/how-it-works">How it works</a>
+      {/* Disclosure-gated (0020b): hidden until SHOW_DETAILS is on. */}
+      {SHOW_DETAILS && <a href="/how-it-works">How it works</a>}
       <a href={DRYRUNS}>dryruns.tools</a>
       <a href={CLIENTS_REPO}>GitHub (clients)</a>
       <a href="/license">License</a>

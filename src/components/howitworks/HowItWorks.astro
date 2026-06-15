@@ -1,0 +1,250 @@
+---
+import CopyBlock from "../CopyBlock.astro";
+import { CLIENTS_REPO, API_BASE } from "../../data/install";
+
+// 0020b "Details / how-it-works" depth. CONTRACT + PLAIN BEHAVIOR ONLY.
+// No engine math, ever. Every contract claim below mirrors the live
+// budgetary-clients docs (docs/api-contract.md, the per-client READMEs);
+// anything the published source does not pin is marked TODO(verify), never
+// invented. The void scenario is described behaviorally — the wire label is
+// not printed (Invariant 1).
+
+const estimateRequest = `POST ${API_BASE}/v1/estimate
+Authorization: Bearer bg_test_…
+
+{
+  "query": "fix the flaky test in the payments service",
+  "model": "claude-opus-4-7",
+  "context": { "host": "claude-code", "project_id": "<hashed>", "depth_budget": 50 }
+}`;
+
+const estimateResponse = `{
+  "estimate_id": "est_01H…",
+  "scenario": "confident",
+  "void": false,
+  "distribution": { "p10": 12500, "p50": 48000, "p90": 220000, "unit": "tokens" },
+  "confidence": 0.74,
+  "model": "claude-opus-4-7",
+  "expires_at": "2026-05-27T10:14:00Z"
+}`;
+
+const actualsRequest = `POST ${API_BASE}/v1/actuals
+
+{
+  "estimate_id": "est_01H…",
+  "tokens_in": 12340,
+  "tokens_out": 36210,
+  "success": true,
+  "duration_ms": 420000
+}`;
+---
+
+<article class="prose wrap" style="max-width: 820px; padding-top: 56px; padding-bottom: 80px;">
+  <p class="eyebrow">budgetary.tools</p>
+  <h1 style="font-size: clamp(1.9rem, 4vw, 2.8rem); margin: 0 0 16px;">How it works</h1>
+  <p class="lede">
+    The honest version, in plain language: what Budgetary promises, the contract it speaks, and
+    where it draws the line. No accuracy claims, no internals — just what the service does and what
+    leaves your machine.
+  </p>
+
+  <!-- 1 ─────────────────────────────────────────────────────────────── -->
+  <section style="border: none; padding: 40px 0 0;">
+    <h2>1 · The promise, made concrete</h2>
+    <p>
+      Budgetary gives your agent a pre-flight estimate <em>before</em> a task runs. For many tasks
+      you get a token range and a confidence signal. For some, it returns a <strong>void</strong> —
+      it declines to put a number on the task rather than guess.
+    </p>
+    <p>
+      The line that defines the product: <strong>never worse than no tool.</strong> A tool that
+      answers confidently when it shouldn't is worse than no tool at all, because you'd act on a
+      number that was never real. So our worst case is silence.
+    </p>
+    <h3>What a void looks like</h3>
+    <p>
+      The API responds with <code>void: true</code> and no distribution (<code>distribution: null</code>),
+      and your agent renders it as <em>"Budgetary cannot confidently estimate this query."</em> No
+      number, no invented range, no hedge dressed up as a forecast.
+    </p>
+    <p>
+      That's a feature, not a gap. A confident-looking number you can't trust is a liability; an
+      honest "no read" is the truthful answer when a confident estimate isn't warranted this time.
+    </p>
+  </section>
+
+  <!-- 2 ─────────────────────────────────────────────────────────────── -->
+  <section style="border: none; padding: 40px 0 0;">
+    <h2>2 · The <code>/v1</code> contract</h2>
+    <p>
+      Budgetary is a hosted HTTP API at <code>{API_BASE}</code> with a stable, versioned
+      <code>/v1</code> contract. Three endpoints carry the whole loop.
+    </p>
+
+    <h3><code>POST /v1/estimate</code> — ask before you run</h3>
+    <p>You send the task description and a little context; you get back a range and a signal.</p>
+    <CopyBlock id="hiw-estimate-req" code={estimateRequest} label="Request" />
+    <div style="height: 14px;"></div>
+    <CopyBlock id="hiw-estimate-res" code={estimateResponse} label="Response — 200 OK" />
+    <p style="margin-top: 14px;">
+      The <strong>range is the estimate.</strong> <code>distribution</code> gives a coarse band —
+      a low (<code>p10</code>), a midpoint (<code>p50</code>), and a high (<code>p90</code>), in
+      combined input + output tokens — not a single magic number. Alongside it:
+    </p>
+    <ul>
+      <li>
+        <code>scenario</code> — a plain-language label for how to read the estimate: whether to take
+        the range at face value, treat it as wide, or treat it with extra caution — plus a label for
+        the void / no-read case. It is an outcome you read, not a description of how it is produced;
+        the exact label strings are enumerated in the
+        <a href={`${CLIENTS_REPO}/blob/main/docs/api-contract.md`}>published <code>/v1</code> contract</a>.
+      </li>
+      <li>
+        <code>confidence</code> — a single <code>[0, 1]</code> summary of estimate quality, meant for
+        humans.
+      </li>
+      <li>
+        <code>void</code> — <code>true</code> when the server declines to estimate (see §1).
+      </li>
+    </ul>
+
+    <h3><code>POST /v1/actuals</code> — tell it what actually happened</h3>
+    <p>
+      After a run, the realized totals go back so future estimates calibrate: <code>tokens_in</code>,
+      <code>tokens_out</code>, a <code>success</code> flag, <code>duration_ms</code>, and an optional
+      behavior trace (§3). These counts are <strong>measured, never model-supplied</strong> (§3).
+    </p>
+    <CopyBlock id="hiw-actuals-req" code={actualsRequest} label="Request" />
+
+    <h3><code>GET /v1/ledger</code> — predicted vs. actual, over time</h3>
+    <p>
+      The ledger is the paginated history of your estimates joined with their actuals — each entry
+      pairs the <code>predicted</code> range with the <code>actual</code> total — so you can see spend
+      in context and aggregate across project and host.
+    </p>
+
+    <p class="note todo">
+      TODO(verify): the project spec references a "categorical band" beyond the <code>p10–p90</code>
+      percentile range and a fixed assessment-label set (<code>normal / efficient / elevated /
+      anomalous / insufficient_data</code>). Neither is pinned in the published <code>/v1</code>
+      contract today — the contract states any server-side run assessment is additive and "does not
+      yet pin those response fields." Not documented here as served until confirmed against source.
+    </p>
+    <p class="note">
+      Full wire details — error model, rate limits, idempotency, stability guarantees — live in the
+      <a href={`${CLIENTS_REPO}/blob/main/docs/api-contract.md`}>published <code>/v1</code> contract</a>.
+    </p>
+  </section>
+
+  <!-- 3 ─────────────────────────────────────────────────────────────── -->
+  <section style="border: none; padding: 40px 0 0;">
+    <h2>3 · Never fabricate a token count</h2>
+    <p>
+      Token counts are <strong>measured, never invented.</strong> The only tool a model can invoke is
+      <code>estimate</code> — there is deliberately no tool a model can call to <em>write</em> a token
+      count, because a fabricated actual would quietly poison calibration. Realized counts come only
+      from a real source: a session-end hook that reads the actual transcript, or a human-entered
+      command. The model never supplies them.
+    </p>
+    <h3>The per-host actuals gradient — stated honestly</h3>
+    <div class="cols">
+      <div class="card does">
+        <h3>Automatic</h3>
+        <ul>
+          <li>
+            <b>Claude Code.</b> The session-end hook reads the real transcript, totals the tokens
+            (cache-read tokens excluded), and submits them — no human action. This host closes the
+            predicted-vs-actual loop on its own.
+          </li>
+        </ul>
+      </div>
+      <div class="card doesnt">
+        <h3>Estimate-only / manual</h3>
+        <ul>
+          <li>
+            <b>Cursor.</b> You get the pre-flight estimate through the MCP tool. There's no
+            session-end event, so nothing is captured automatically — you record actuals by hand
+            when you have a moment (<code>npx @budgetary/mcp report-actual</code>), and none is ever
+            fabricated.
+          </li>
+          <li>
+            <b>Codex.</b> Codex exposes no session-end plugin event, so there is no automatic path
+            today; you submit actuals manually after a session, the same way. Never invented.
+          </li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">
+      The "Estimate-only / manual" side means "no auto-capture here," not "lower quality" — an
+      estimate with no actuals is honest about being an estimate.
+    </p>
+  </section>
+
+  <!-- 4 ─────────────────────────────────────────────────────────────── -->
+  <section style="border: none; padding: 40px 0 0;">
+    <h2>4 · Privacy — what leaves the machine</h2>
+    <p>
+      These are exactly the guarantees the shipped clients make today. We mirror them here and claim
+      nothing more. Only these values cross the network, and only to <code>{API_BASE}</code>:
+    </p>
+    <ul>
+      <li>The <strong>task description</strong> you ask Budgetary to estimate.</li>
+      <li>
+        A <strong>SHA-256 prefix of your working-directory absolute path</strong> — it groups
+        estimates by project and reveals nothing about the path itself.
+      </li>
+      <li>
+        When actuals are submitted: <code>tokens_in</code>, <code>tokens_out</code>,
+        <code>duration_ms</code>, a <code>success</code> flag, and — on Claude Code — a behavior
+        trace: per step, the host tool name, a token count, a <strong>redacted descriptor</strong> of
+        what it touched (a program name such as <code>pytest</code> in the clear, plus a
+        non-reversible digest of the rest — or a bare path digest for a file tool), and whether the
+        step succeeded.
+      </li>
+    </ul>
+    <p>
+      <strong>No file contents, absolute paths, command arguments, or tool output ever leave the
+      machine</strong> — only program names and opaque digests. Set
+      <code>BUDGETARY_TRACE_TARGET=off</code> to omit the descriptor entirely. Nothing else leaves the
+      machine, and your API key is never logged. The project key and descriptor digests are
+      non-reversible SHA-256 hashes, and the pending store lives locally at
+      <code>~/.budgetary/pending.json</code>.
+    </p>
+    <p class="note todo">
+      TODO(verify): retention windows and any account-level data controls are properties of the
+      hosted service, governed by the <a href="/terms">Terms</a> — not stated by the clients, so not
+      asserted here.
+    </p>
+  </section>
+
+  <!-- 5 ─────────────────────────────────────────────────────────────── -->
+  <section style="border: none; padding: 40px 0 0;">
+    <h2>5 · What it does <em>not</em> do</h2>
+    <ul class="dont-list" style="list-style: none; padding: 0;">
+      <li>
+        <b>Not a guaranteed predictor.</b> Estimates are qualified, not promised. The numbers are
+        server-computed and may shift as the model improves, and are not promised to be reproducible
+        bit-for-bit; when it can't answer confidently, it returns a void instead of a number.
+      </li>
+      <li>
+        <b>Not a codebase indexer.</b> It reads the task you describe, not your repository. Only a
+        hashed project key and — on Claude Code — a behavior trace (host tool names and token counts,
+        with an opt-out-able program-name descriptor) ever describe your environment.
+      </li>
+      <li>
+        <b>Not per-keystroke.</b> It estimates a task before you run it; it is not a live meter
+        watching your editor.
+      </li>
+      <li>
+        <b>A "no read" is honest, not a failure.</b> Declining to estimate (<code>void: true</code>)
+        is a designed outcome — the contract is explicit that a void is <em>not</em> an error.
+      </li>
+    </ul>
+  </section>
+
+  <p style="margin-top: 48px;">
+    <a href="/">← Back to home</a> &nbsp;·&nbsp;
+    <a href={CLIENTS_REPO}>Clients &amp; SDKs on GitHub</a> &nbsp;·&nbsp;
+    <a href="https://dryruns.tools">See it live at dryruns.tools</a>
+  </p>
+</article>

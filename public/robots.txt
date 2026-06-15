@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://budgetary.tools/sitemap-index.xml
