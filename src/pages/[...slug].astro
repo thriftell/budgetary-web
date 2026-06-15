@@ -1,0 +1,31 @@
+---
+import Base from "../layouts/Base.astro";
+import Footer from "../components/Footer.astro";
+import HowItWorks from "../components/howitworks/HowItWorks.astro";
+import { SHOW_DETAILS } from "../config";
+
+// ── DISCLOSURE GATE (0020b) ────────────────────────────────────────────────
+// These pages are the most disclosure-sensitive on the site and their go-live
+// is COUNSEL-GATED. getStaticPaths returns NOTHING unless SHOW_DETAILS=true, so
+// by default the gated routes are not emitted into dist/ at all — zero public
+// exposure. See GATING.md for the two-step go-live.
+export function getStaticPaths() {
+  if (!SHOW_DETAILS) return [];
+  return [{ params: { slug: "how-it-works" } }];
+}
+
+const { slug } = Astro.params;
+---
+
+{
+  slug === "how-it-works" && (
+    /* noindex is intentional. STEP 2 of go-live (after counsel sign-off): set
+       noindex={false} here to allow indexing. STEP 1 is SHOW_DETAILS=true. */
+    <Base title="How it works — budgetary.tools" description="How Budgetary works: the promise, the /v1 contract, never-fabricate, and privacy — contract and behavior only." noindex={true}>
+      <main>
+        <HowItWorks />
+      </main>
+      <Footer />
+    </Base>
+  )
+}

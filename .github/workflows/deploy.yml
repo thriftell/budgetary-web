@@ -27,7 +27,21 @@ jobs:
       - run: npm ci
       # `prebuild` runs the forbidden-phrase gate over src/; `postbuild` runs it
       # over the rendered dist/. A hit fails the build (Invariants 1 & 2).
+      #
+      # ┌─ DISCLOSURE GATE (0020b) — COUNSEL-GATED PUBLISH ──────────────────────┐
+      # │ SHOW_DETAILS is committed as "false", so the /how-it-works depth is    │
+      # │ NOT emitted, indexed, or linked in production.                         │
+      # │                                                                        │
+      # │ Setting SHOW_DETAILS to "true" below IS the irreversible, pre-filing-  │
+      # │ sensitive publish action. It must happen ONLY via a reviewed PR after  │
+      # │ counsel sign-off — deliberately NOT a repo/environment variable that a │
+      # │ single toggle could flip without code review. (Then see GATING.md      │
+      # │ step 2 to also allow indexing.) Recommended belt-and-suspenders:       │
+      # │ protect the `github-pages` environment with required reviewers.        │
+      # └────────────────────────────────────────────────────────────────────────┘
       - run: npm run build
+        env:
+          SHOW_DETAILS: "false"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist

@@ -16,4 +16,24 @@ jobs:
           cache: npm
       - run: npm ci
       # Honesty gate runs as prebuild (src) + postbuild (dist) inside `build`.
+      # Default build: disclosure gate CLOSED (gated pages absent from dist/).
       - run: npm run build
+      - name: Assert disclosure gate is CLOSED by default (all layers)
+        run: |
+          set -e
+          test ! -e dist/how-it-works/index.html                 # not emitted
+          grep -q 'Disallow: /how-it-works' dist/robots.txt       # robots disallows
+          ! grep -q 'how-it-works' dist/sitemap-0.xml             # absent from sitemap
+          ! grep -q 'how-it-works' dist/index.html                # not linked from home
+      # Gate-open build: emits the gated pages so the honesty grep (postbuild)
+      # also scans the rendered /how-it-works HTML for banned engine vocabulary.
+      - name: Build with disclosure gate OPEN (scans gated copy)
+        run: SHOW_DETAILS=true npm run build
+      - name: Assert disclosure gate is consistent when OPEN (all layers)
+        run: |
+          set -e
+          test -e dist/how-it-works/index.html                   # emitted
+          grep -q 'noindex' dist/how-it-works/index.html         # still noindex until go-live step 2
+          ! grep -q 'Disallow: /how-it-works' dist/robots.txt     # robots no longer disallows
+          grep -q 'how-it-works' dist/sitemap-0.xml              # present in sitemap
+          grep -q 'how-it-works' dist/index.html                 # linked from home

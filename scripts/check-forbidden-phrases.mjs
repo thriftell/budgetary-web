@@ -31,20 +31,45 @@ const FORBIDDEN_COPY = [
   { id: "tracks-codebase", re: /\b(tracks?|indexes?|scans?)\s+your\s+(codebase|repo|repository)/i },
 ];
 
-// ── Engine-internals vocabulary (Invariant 1). Pre-filing-sensitive; the
-//    engine is private. Public vocabulary is the /v1 contract + plain behavior
-//    words only. NOTE: `out_of_domain` is a wire-contract scenario label but is
-//    explicitly forbidden as public marketing copy — render "no read" instead.
+// ── Engine-internals vocabulary (Invariant 1, extended for 0020b). The engine
+//    is private and pre-filing-sensitive (provisional not filed until
+//    2026-07-31). A page titled "how it works" is the single likeliest place to
+//    leak the moat, so this list is the hardest guard on the site. Public
+//    vocabulary is the /v1 contract + plain behavior words ONLY.
+//    NOTE: `out_of_domain` is a wire-contract scenario label but is explicitly
+//    forbidden in copy — describe the void behaviorally (`void: true`,
+//    `distribution: null`, "cannot confidently estimate this query") instead.
 const FORBIDDEN_INTERNALS = [
   { id: "knn", re: /\bk-?nn\b/i },
   { id: "nearest-neighbor", re: /\bnearest[-\s]neighbou?rs?\b/i },
   { id: "neighbors", re: /\bneighbou?rs?\b/i },
   { id: "coverage-method", re: /\bcoverage\s+method\b/i },
   { id: "bandwidth", re: /\bbandwidth\b/i },
+  { id: "kernel", re: /\bkernels?\b/i },
   { id: "csr", re: /\bCSR\b/ },
+  { id: "scorecard", re: /\bscorecards?\b/i },
+  { id: "stability-signal", re: /\bstability\s+signal\b/i },
   { id: "ambiguity-scoring", re: /\bambiguity\s+scor/i },
-  { id: "manifold", re: /\bmanifold\b/i },
+  { id: "manifold", re: /\bmanifolds?\b/i },
+  { id: "intrinsic-dimension", re: /\bintrinsic\s+dimension/i },
+  { id: "embedding", re: /\bembeddings?\b/i },
+  { id: "corpus", re: /\bcorpus|corpora\b/i },
   { id: "out-of-domain", re: /\bout[_-]of[_-]domain\b/i },
+
+  // Paraphrased coverage / instance / proximity-to-prior-data concepts. The
+  // moat is not just the banned NOUNS — it is the idea that estimate quality is
+  // a function of how close a query sits to a body of prior observations. These
+  // catch the plain-English leak (the 0020b adversarial review found the build
+  // passed clean while three reviewers flagged exactly this concept).
+  { id: "grounding", re: /\bgrounding\b/i },
+  { id: "well-supported", re: /\bwell[-\s]supported\b/i },
+  { id: "seen-before", re: /\b(been seen|seen before)\b/i },
+  { id: "near-the-edge", re: /\bnear the edge\b/i },
+  { id: "sparse-evidence", re: /\bsparse[_\s]evidence\b/i },
+  { id: "proximity", re: /\bproximit(y|ies)\b/i },
+  { id: "distance-to", re: /\bdistance to (known|prior|seen|similar)\b/i },
+  { id: "similar-past", re: /\bsimilar (past )?(tasks|queries|examples|runs)\b/i },
+  { id: "how-unusual", re: /\bhow unusual\b/i },
 ];
 
 const RULES = [...FORBIDDEN_COPY, ...FORBIDDEN_INTERNALS];
