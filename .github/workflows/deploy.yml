@@ -42,6 +42,9 @@ jobs:
       - run: npm run build
         env:
           SHOW_DETAILS: "false"
+          # Public Turnstile site key for the signup widget (0021b). Public value,
+          # injected at build time; the matching secret lives server-side (0021a).
+          PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
