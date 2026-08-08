@@ -1,6 +1,13 @@
 ---
 import CopyBlock from "./CopyBlock.astro";
-import { CLAUDE_PLUGIN, MCP_STDIO, VSCODE_STEPS, MCP_HTTP_REMOTE } from "../data/install";
+import {
+  CLAUDE_PLUGIN,
+  MCP_STDIO,
+  VSCODE_STEPS,
+  MCP_HTTP_REMOTE,
+  VSCODE_EXTENSION_ID,
+  VSCODE_OPEN_VSX,
+} from "../data/install";
 ---
 
 <section id="install">
@@ -32,7 +39,9 @@ import { CLAUDE_PLUGIN, MCP_STDIO, VSCODE_STEPS, MCP_HTTP_REMOTE } from "../data
 
       <div>
         <CopyBlock id="install-vscode" code={VSCODE_STEPS} label="VS Code" />
-        <p class="note todo">TODO(verify): exact Open VSX / Marketplace extension id not yet pinned in source.</p>
+        <p class="note">
+          Open VSX listing: <a href={VSCODE_OPEN_VSX}><code>{VSCODE_EXTENSION_ID}</code></a>.
+        </p>
       </div>
     </div>
   </div>
