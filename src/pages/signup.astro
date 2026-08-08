@@ -5,10 +5,11 @@ import CopyBlock from "../components/CopyBlock.astro";
 import { HERO_INSTALL, API_BASE } from "../data/install";
 
 // Cloudflare Turnstile site key is PUBLIC and belongs in the page (the secret
-// stays server-side in 0021a). Default is Cloudflare's official "always passes"
-// TEST key, so the page works in dev/preview; production sets the real key via
-// the PUBLIC_TURNSTILE_SITE_KEY build env var.
-// TODO(verify): set PUBLIC_TURNSTILE_SITE_KEY to the real Turnstile site key for production.
+// stays server-side in 0021a). The fallback is Cloudflare's official "always
+// passes" TEST key, so the page works in dev/preview. Production supplies the
+// real key via the PUBLIC_TURNSTILE_SITE_KEY build env var, which the Pages
+// workflow passes into the build — confirmed live: the served page carries the
+// production site key, not this fallback.
 const TURNSTILE_SITE_KEY =
   import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
 ---
@@ -78,8 +79,9 @@ const TURNSTILE_SITE_KEY =
     // the key is server-generated and shown once; only the public captcha site
     // key is in the page.
     //
-    // TODO(verify) against 0021a: the request captcha field name and the
-    // response key field name below are not yet pinned in published source.
+    // Field names verified 2026-08-09 against the 0021a route: the request takes
+    // `captcha_token` and the response returns the plaintext as `api_key` (shown
+    // exactly once). The extra reads below are defensive only.
     const CAPTCHA_FIELD = "captcha_token";
     const readKey = (data) => data.api_key || data.key || data.token;
 

@@ -2,14 +2,19 @@
  * Install + prompt strings for the landing page.
  *
  * Every command here is traced to a source. Do NOT edit a command to "look
- * nicer" — if a string isn't confirmed by source, it carries a TODO(verify)
- * note and is flagged in the PR's "Deviations from spec" section.
+ * nicer" — a string that isn't confirmed by source does not ship.
  *
  * Sources (verified 2026-06-15):
  *  - budgetary-clients docs/installation.md   → Claude Code plugin flow, VS Code, Codex status
  *  - budgetary-clients docs/api-contract.md    → key prefixes, /v1/estimate, scenarios, void
  *  - MCP registry io.github.thriftell/budgetary v0.1.1 → @budgetary/mcp (stdio),
  *      hosted streamable-http remote https://api.budgetary.tools/mcp, env BUDGETARY_API_KEY
+ *
+ * Host config formats (verified 2026-08-09 against each host's official docs):
+ *  - Cursor   https://cursor.com/docs/context/mcp        → .cursor/mcp.json, top-level
+ *      "mcpServers", per-server command / args / env
+ *  - Codex    https://developers.openai.com/codex/mcp    → ~/.codex/config.toml,
+ *      [mcp_servers.<id>] table, command / args, env as an [mcp_servers.<id>.env] sub-table
  */
 
 export const API_BASE = "https://api.budgetary.tools";
@@ -71,9 +76,10 @@ export const CURSOR = {
   actuals: "manual" as const,
   actualsLine:
     "Actuals: estimate-only. Cursor gets the pre-flight estimate; it does not auto-report real usage back — so there's no realized number to show, and none is fabricated.",
-  // TODO(verify): no Budgetary-authored Cursor doc exists yet. This .cursor/mcp.json
-  // is derived from the registry stdio package (@budgetary/mcp) + Cursor's standard
-  // MCP config format. Confirm against an official Cursor setup doc before launch.
+  // Verified 2026-08-09 against Cursor's official MCP doc
+  // (https://cursor.com/docs/context/mcp): project config lives at `.cursor/mcp.json`,
+  // the top-level key is `mcpServers`, and a stdio server entry carries
+  // `command` / `args` / `env`. Package + env var are registry-confirmed.
   onboarding: `Create a file at .cursor/mcp.json in this project with exactly the JSON below, then tell me to reload MCP servers in Cursor's settings.
 
 Ask me for my Budgetary API key first (bg_test_ or bg_live_ prefix) and drop it into the BUDGETARY_API_KEY field. Do not store it anywhere else, and do not commit this file. This adds one MCP server (the "estimate" tool) and changes nothing else.
@@ -98,10 +104,11 @@ export const CODEX = {
   actuals: "manual" as const,
   actualsLine:
     "Actuals: estimate-only / manual. Codex exposes no session-end event, so realized spend is never auto-captured — and never invented.",
-  // TODO(verify): docs/installation.md says the Codex client install "will land
-  // alongside the first published Codex release." This [mcp_servers] block is
-  // derived from the registry stdio package + Codex's documented config.toml
-  // schema. Confirm against the official Codex release before launch.
+  // Verified 2026-08-09 against Codex's official MCP doc
+  // (https://developers.openai.com/codex/mcp): config lives at `~/.codex/config.toml`,
+  // one `[mcp_servers.<id>]` table per server with `command` / `args`, and env vars
+  // in an `[mcp_servers.<id>.env]` sub-table — the form the doc's worked example
+  // uses. Package + env var are registry-confirmed.
   onboarding: `Add Budgetary as an MCP server in my Codex config (~/.codex/config.toml) by appending exactly the block below.
 
 Ask me for my Budgetary API key first (bg_test_ or bg_live_ prefix) and put it in the BUDGETARY_API_KEY value. Do not store it anywhere else or echo it back. This registers one MCP server (the "estimate" tool) and changes nothing else in my config.
@@ -109,7 +116,9 @@ Ask me for my Budgetary API key first (bg_test_ or bg_live_ prefix) and put it i
 [mcp_servers.budgetary]
 command = "npx"
 args = ["-y", "@budgetary/mcp"]
-env = { BUDGETARY_API_KEY = "bg_test_YOUR_KEY" }`,
+
+[mcp_servers.budgetary.env]
+BUDGETARY_API_KEY = "bg_test_YOUR_KEY"`,
   demo: `Call the Budgetary "estimate" tool for a pre-flight token-spend estimate on this task, and show me the range, scenario, and confidence before you do anything:
 
   "Migrate the config loader from JSON to TOML and keep backward compatibility."
