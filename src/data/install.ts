@@ -16,7 +16,6 @@ export const API_BASE = "https://api.budgetary.tools";
 export const MCP_HTTP_REMOTE = "https://api.budgetary.tools/mcp";
 export const MCP_PACKAGE = "@budgetary/mcp";
 export const CLIENTS_REPO = "https://github.com/thriftell/budgetary-clients";
-export const DRYRUNS = "https://dryruns.tools";
 
 // Hero one-command install. Hosted MCP via the Claude Code CLI: the remote URL
 // and key prefix are registry-confirmed; the `claude mcp add --transport http`
@@ -33,10 +32,14 @@ export const CLAUDE_PLUGIN = `/plugin marketplace add thriftell/budgetary-client
 export const MCP_STDIO = `npx -y @budgetary/mcp
 # requires env BUDGETARY_API_KEY=bg_test_…  (free tier) or bg_live_…`;
 
-// VS Code — method confirmed by docs/installation.md ("Budgetary" from the
-// Marketplace or Open VSX, then run `Budgetary: Sign In`). Exact Open VSX
-// extension id (@budgetary/vscode) is not pinned in source → TODO(verify).
-export const VSCODE_STEPS = `1. Install "Budgetary" from the VS Code Marketplace or Open VSX.
+// VS Code — the extension is published to Open VSX ONLY. Pinned from the Open
+// VSX API (verified 2026-08-08): namespace "budgetary", name "budgetary-vscode",
+// displayName "Budgetary". The Microsoft VS Code Marketplace listing does not
+// exist (itemName budgetary.budgetary-vscode → HTTP 404), so it is not named
+// here. `Budgetary: Sign In` is from docs/installation.md.
+export const VSCODE_EXTENSION_ID = "budgetary.budgetary-vscode";
+export const VSCODE_OPEN_VSX = "https://open-vsx.org/extension/budgetary/budgetary-vscode";
+export const VSCODE_STEPS = `1. Install "Budgetary" (budgetary.budgetary-vscode) from Open VSX.
 2. Run the command:  Budgetary: Sign In
 3. Paste your API key (bg_test_… free, or bg_live_…) when prompted.`;
 
