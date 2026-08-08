@@ -5,9 +5,11 @@ import { CLIENTS_REPO, API_BASE } from "../../data/install";
 // 0020b "Details / how-it-works" depth. CONTRACT + PLAIN BEHAVIOR ONLY.
 // No engine math, ever. Every contract claim below mirrors the live
 // budgetary-clients docs (docs/api-contract.md, the per-client READMEs);
-// anything the published source does not pin is marked TODO(verify), never
-// invented. The void scenario is described behaviorally — the wire label is
-// not printed (Invariant 1).
+// anything the published source does not pin is not asserted here — say what
+// the contract pins, hedge in visitor-facing language otherwise, and never
+// invent. Internal review markers do not belong in rendered copy. The void
+// scenario is described behaviorally — the wire label is not printed
+// (Invariant 1).
 
 const estimateRequest = `POST ${API_BASE}/v1/estimate
 Authorization: Bearer bg_test_…
@@ -123,12 +125,11 @@ const actualsRequest = `POST ${API_BASE}/v1/actuals
       in context and aggregate across project and host.
     </p>
 
-    <p class="note todo">
-      TODO(verify): the project spec references a "categorical band" beyond the <code>p10–p90</code>
-      percentile range and a fixed assessment-label set (<code>normal / efficient / elevated /
-      anomalous / insufficient_data</code>). Neither is pinned in the published <code>/v1</code>
-      contract today — the contract states any server-side run assessment is additive and "does not
-      yet pin those response fields." Not documented here as served until confirmed against source.
+    <p class="note">
+      Beyond the <code>p10–p90</code> range shown above, the published <code>/v1</code> contract
+      states that any server-side run assessment is additive and "does not yet pin those response
+      fields." Those fields are therefore not documented here as served — check the contract for
+      what a given version returns.
     </p>
     <p class="note">
       Full wire details — error model, rate limits, idempotency, stability guarantees — live in the
@@ -210,10 +211,10 @@ const actualsRequest = `POST ${API_BASE}/v1/actuals
       non-reversible SHA-256 hashes, and the pending store lives locally at
       <code>~/.budgetary/pending.json</code>.
     </p>
-    <p class="note todo">
-      TODO(verify): retention windows and any account-level data controls are properties of the
-      hosted service, governed by the <a href="/terms">Terms</a> — not stated by the clients, so not
-      asserted here.
+    <p class="note">
+      Retention windows and any account-level data controls are properties of the hosted service and
+      are governed by the <a href="/terms">Terms</a> — the clients do not state them, so this page
+      does not either.
     </p>
   </section>
 
