@@ -2,10 +2,12 @@
 import CopyBlock from "./CopyBlock.astro";
 import { CLAUDE_CODE, CURSOR, CODEX } from "../data/install";
 
+// Each platform's config snippet is verified against that host's official MCP
+// doc — see the source list in ../data/install.ts.
 const platforms = [
-  { key: "claude", name: "Claude Code", data: CLAUDE_CODE, hasTodo: false },
-  { key: "cursor", name: "Cursor", data: CURSOR, hasTodo: true },
-  { key: "codex", name: "Codex", data: CODEX, hasTodo: true },
+  { key: "claude", name: "Claude Code", data: CLAUDE_CODE },
+  { key: "cursor", name: "Cursor", data: CURSOR },
+  { key: "codex", name: "Codex", data: CODEX },
 ];
 ---
 
@@ -31,11 +33,6 @@ const platforms = [
           <div class="body">
             <div>
               <CopyBlock id={`${p.key}-onboarding`} code={p.data.onboarding} label="a · Onboarding — paste into the agent" />
-              {p.hasTodo && (
-                <p class="note todo">
-                  TODO(verify): config derived from the MCP registry package; not yet confirmed against an official {p.name} setup doc.
-                </p>
-              )}
             </div>
             <div>
               <CopyBlock id={`${p.key}-demo`} code={p.data.demo} label="b · Demo — see the estimate tool in use" />
