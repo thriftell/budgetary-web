@@ -130,7 +130,9 @@ section:first-of-type { border-top: none; }
   white-space: nowrap;
 }
 .actuals.auto { color: var(--accent); border: 1px solid var(--accent-dim); }
-.actuals.manual { color: var(--warn); border: 1px solid #5a4a1e; }
+/* `conditional` (0020g) = automatic only once something else is installed. It
+   shares manual's amber because, as installed, actuals are not automatic. */
+.actuals.manual, .actuals.conditional { color: var(--warn); border: 1px solid #5a4a1e; }
 .prompt-label {
   font-family: var(--mono); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--fg-faint); margin: 0 0 8px; display: block;
