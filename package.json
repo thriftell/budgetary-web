@@ -12,10 +12,11 @@
   },
   "scripts": {
     "check:copy": "node scripts/check-forbidden-phrases.mjs",
+    "check:install": "node scripts/check-hero-placeholder.mjs",
     "dev": "astro dev",
-    "prebuild": "npm run check:copy",
+    "prebuild": "npm run check:copy && npm run check:install",
     "build": "astro build",
-    "postbuild": "node scripts/check-forbidden-phrases.mjs dist",
+    "postbuild": "node scripts/check-forbidden-phrases.mjs dist && node scripts/check-hero-placeholder.mjs dist",
     "preview": "astro preview",
     "astro": "astro"
   },

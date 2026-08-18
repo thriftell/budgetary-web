@@ -5,6 +5,7 @@ import {
   MCP_STDIO,
   VSCODE_STEPS,
   MCP_HTTP_REMOTE,
+  MCP_HTTP_REMOTE_CAVEAT,
   VSCODE_EXTENSION_ID,
   VSCODE_OPEN_VSX,
 } from "../data/install";
@@ -26,14 +27,18 @@ import {
           code={CLAUDE_PLUGIN}
           label="Claude Code — plugin"
         />
-        <p class="note">Claude Code prompts for your API key during install and stores it in your system keychain.</p>
+        <p class="note">
+          Claude Code prompts for your API key during install and stores it in your system keychain.
+          The plugin is also what wires the session-end hook that submits your real token counts — a
+          bare <code>claude mcp add</code> gives you the <code>estimate</code> tool on its own.
+        </p>
       </div>
 
       <div>
         <CopyBlock id="install-stdio" code={MCP_STDIO} label="Any MCP agent — stdio" />
         <p class="note">
           Or point your agent at the hosted server directly: <code>{MCP_HTTP_REMOTE}</code>
-          (streamable-http, bearer auth).
+          (streamable-http, bearer auth). {MCP_HTTP_REMOTE_CAVEAT}
         </p>
       </div>
 

@@ -26,9 +26,11 @@ const platforms = [
         <article class="platform">
           <header>
             <h3>{p.name}</h3>
-            <span class={`actuals ${p.data.actuals}`}>
-              {p.data.actuals === "auto" ? "● actuals: auto" : "○ actuals: estimate-only"}
-            </span>
+            {/* 0020g: the label is supplied by the data, not derived from a
+                boolean here. The old `actuals === "auto"` ternary could only say
+                two things, so Claude Code — the one host that can be automatic,
+                and only with the plugin — was rendered as flatly automatic. */}
+            <span class={`actuals ${p.data.actuals}`}>{p.data.actualsBadge}</span>
           </header>
           <div class="body">
             <div>
